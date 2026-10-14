@@ -23,10 +23,22 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - uses: actions/cache@v4
+        id: cache-jmeter
+        with:
+          path: apache-jmeter-${{ env.JMETER_VERSION }}
+          key: jmeter-${{ env.JMETER_VERSION }}
+
+      # archive.apache.org est souvent très lent, on passe d'abord par le CDN
       - name: Installation de JMeter
+        if: steps.cache-jmeter.outputs.cache-hit != 'true'
         run: |
-          curl -sSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_VERSION.tgz | tar xz
-          echo "$PWD/apache-jmeter-$JMETER_VERSION/bin" >> $GITHUB_PATH
+          f=apache-jmeter-$JMETER_VERSION.tgz
+          curl -fsSL --max-time 120 https://dlcdn.apache.org/jmeter/binaries/$f -o $f \
+            || curl -fsSL --max-time 300 https://archive.apache.org/dist/jmeter/binaries/$f -o $f
+          tar xzf $f
+
+      - run: echo "$PWD/apache-jmeter-$JMETER_VERSION/bin" >> $GITHUB_PATH
 
       - name: Tir de validation
         run: sh run.sh validation
