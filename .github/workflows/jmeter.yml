@@ -33,9 +33,9 @@ jobs:
 
       - name: Échec si erreurs
         run: |
-          total=$(tail -n +2 results/validation/result.jtl | wc -l)
-          ko=$(tail -n +2 results/validation/result.jtl | grep -c ',false,' || true)
-          echo "$total requêtes, $ko en erreur"
+          total=$(jq '.Total.sampleCount' results/validation/report/statistics.json)
+          ko=$(jq '.Total.errorCount' results/validation/report/statistics.json)
+          echo "$total échantillons, $ko en erreur"
           [ "$total" -gt 0 ] && [ "$ko" -eq 0 ]
 
       - name: Rapport HTML
