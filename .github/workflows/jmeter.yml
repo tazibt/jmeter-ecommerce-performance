@@ -1,0 +1,46 @@
+name: JMeter
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  JMETER_VERSION: 5.6.3
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Installation de JMeter
+        run: |
+          curl -sSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_VERSION.tgz | tar xz
+          echo "$PWD/apache-jmeter-$JMETER_VERSION/bin" >> $GITHUB_PATH
+
+      - name: Tir de validation
+        run: sh run.sh validation
+
+      - name: Échec si erreurs
+        run: |
+          total=$(tail -n +2 results/validation/result.jtl | wc -l)
+          ko=$(tail -n +2 results/validation/result.jtl | grep -c ',false,' || true)
+          echo "$total requêtes, $ko en erreur"
+          [ "$total" -gt 0 ] && [ "$ko" -eq 0 ]
+
+      - name: Rapport HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-jmeter
+          path: results/validation/
