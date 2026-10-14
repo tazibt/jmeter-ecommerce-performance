@@ -8,7 +8,7 @@ avec rapport HTML.
 
 La cible est l'API de démonstration publique de Gatling (`api-ecomm.gatling.io`), prévue pour
 s'entraîner aux tests de charge. L'étape de paiement peut être envoyée sur
-[mock-payment-sap](https://github.com/tazibt/mock-payment-sap).
+[mock-payment-api](https://github.com/tazibt/mock-payment-api).
 
 ## Le plan de test
 
